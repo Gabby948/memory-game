@@ -5,6 +5,7 @@
     // Cartas y variables globales
     const cardsArray = ['🍎', '🍌', '🍓', '🍍', '🍇', '🍉', '🥝', '🍒'];
     let shuffledCards = [...cardsArray, ...cardsArray].sort(() => 0.5 - Math.random());
+    console.log(shuffledCards);
     let firstCard = null;
     let secondCard = null;
     let matchedPairs = 0;
