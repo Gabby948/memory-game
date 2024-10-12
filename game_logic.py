@@ -1,49 +1,51 @@
 import pygame
-import random
-from board import Board
 
 class MemoryGame:
     def __init__(self, screen, width, height):
         self.screen = screen
         self.width = width
         self.height = height
-        self.board = Board(screen)
-        self.first_card = None
-        self.second_card = None
-        self.matched_pairs = 0
+        self.cards = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'] * 2
+        self.cards = self.shuffle_cards()
+        self.card_size = 80
+        self.font = pygame.font.Font(None, 60)
+        self.revealed = [False] * len(self.cards)
+        self.selected = []
+        self.matches = []
 
-    def handle_click(self, pos):
-        clicked_card = self.board.get_card_at(pos)
-
-        if clicked_card is not None and not clicked_card.revealed:
-            if self.first_card is None:
-                self.first_card = clicked_card
-                clicked_card.reveal()
-            elif self.second_card is None:
-                self.second_card = clicked_card
-                clicked_card.reveal()
-                self.check_match()
-
-    def check_match(self):
-        if self.first_card.emoji == self.second_card.emoji:
-            self.first_card.matched = True
-            self.second_card.matched = True
-            self.matched_pairs += 1
-        else:
-            pygame.time.wait(1000)
-            self.first_card.hide()
-            self.second_card.hide()
-
-        self.first_card = None
-        self.second_card = None
+    def shuffle_cards(self):
+        import random
+        random.shuffle(self.cards)
+        return self.cards
 
     def draw(self):
-        self.board.draw()
+        for i, card in enumerate(self.cards):
+            x = (i % 4) * (self.card_size + 10) + 50
+            y = (i // 4) * (self.card_size + 10) + 50
+            rect = pygame.Rect(x, y, self.card_size, self.card_size)
+            pygame.draw.rect(self.screen, (200, 200, 200), rect)
 
+            if self.revealed[i] or i in self.selected or i in self.matches:
+                text = self.font.render(card, True, (0, 0, 0))
+                text_rect = text.get_rect(center=rect.center)
+                self.screen.blit(text, text_rect)
 
+    def handle_click(self, pos):
+        for i, card in enumerate(self.cards):
+            x = (i % 4) * (self.card_size + 10) + 50
+            y = (i // 4) * (self.card_size + 10) + 50
+            rect = pygame.Rect(x, y, self.card_size, self.card_size)
 
+            if rect.collidepoint(pos) and not self.revealed[i]:
+                self.selected.append(i)
+                if len(self.selected) == 2:
+                    self.check_match()
 
-
+    def check_match(self):
+        if self.cards[self.selected[0]] == self.cards[self.selected[1]]:
+            self.matches.extend(self.selected)
+        self.revealed = [i in self.matches for i in range(len(self.cards))]
+        self.selected.clear()
 
 # import pygame
 # import random
